@@ -180,9 +180,9 @@ function initializeMap() {
         map.remove();
     }
 
-    // Default center (Buenos Aires, Argentina)
-    let defaultLat = -34.6037;
-    let defaultLng = -58.3816;
+    // Default center (Cochabamba, Bolivia)
+    let defaultLat = -17.3895;
+    let defaultLng = -66.1568;
     let defaultZoom = 14;
 
     // If we already have a location, use it
