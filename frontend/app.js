@@ -1,7 +1,7 @@
 // Configuration
 const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:8080/api'
-    : `${window.location.protocol}//${window.location.hostname}:8080/api`;
+    : `${window.location.protocol}//${window.location.hostname}/api`;
 
 // State
 let selectedPhoto = null;
@@ -231,7 +231,7 @@ function initializeMap() {
         checkValidation();
     });
 
-    // Try to get user's current location and center map
+    // Try to get user's current location and center map (without requesting permission)
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -241,7 +241,8 @@ function initializeMap() {
             },
             () => {
                 // Silently fail - map will stay at default location
-            }
+            },
+            { maximumAge: 60000, timeout: 5000 } // Use cached location if available
         );
     }
 }
@@ -286,13 +287,13 @@ async function getCurrentLocation() {
 
         switch (error.code) {
             case error.PERMISSION_DENIED:
-                errorMessage = 'Permiso de ubicación denegado. Por favor, habilita los permisos de ubicación.';
+                errorMessage = 'Permiso denegado. En iOS: Ajustes > Safari > Ubicación > Permitir. O usa el mapa.';
                 break;
             case error.POSITION_UNAVAILABLE:
-                errorMessage = 'Ubicación no disponible. Intenta con el mapa.';
+                errorMessage = 'Ubicación no disponible. Usa el mapa para seleccionar manualmente.';
                 break;
             case error.TIMEOUT:
-                errorMessage = 'Tiempo de espera agotado. Intenta nuevamente.';
+                errorMessage = 'Tiempo agotado. Intenta con el mapa.';
                 break;
         }
 
