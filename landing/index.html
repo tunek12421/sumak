@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUMATE - Reporta Incidentes en tu Ciudad</title>
+    <meta name="description" content="Descarga SUMATE, la app para reportar incidentes con foto y ubicación en Cochabamba.">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="SUMATE - Reporta Incidentes">
+    <meta property="og:description" content="Descarga la app y ayuda a mejorar tu ciudad reportando incidentes">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://zta.148.230.91.96.nip.io/icon-192.png">
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="icon">📱</span>
+                        SUMATE
+                    </h1>
+                    <p class="hero-subtitle">Reporta incidentes en tu ciudad</p>
+                    <p class="hero-description">
+                        Una aplicación simple y rápida para reportar problemas urbanos con foto y ubicación.
+                        Ayuda a mejorar tu comunidad en Cochabamba.
+                    </p>
+
+                    <div class="cta-buttons">
+                        <a href="https://zta.148.230.91.96.nip.io" class="btn btn-primary">
+                            🚀 Abrir App
+                        </a>
+                        <button id="installBtn" class="btn btn-secondary" style="display: none;">
+                            📲 Instalar App
+                        </button>
+                    </div>
+
+                    <div class="install-instructions">
+                        <p class="small-text">
+                            💡 <strong>Tip:</strong> Agrega SUMATE a tu pantalla de inicio para acceso rápido
+                        </p>
+                    </div>
+                </div>
+
+                <div class="hero-image">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <img src="https://zta.148.230.91.96.nip.io/icon-512.png" alt="SUMATE App" class="app-screenshot">
+                        </div>
+                    </div>
+
+                    <div class="qr-section">
+                        <div class="qr-card">
+                            <p class="qr-title">Escanea para abrir</p>
+                            <div id="qrcode"></div>
+                            <p class="qr-url">zta.148.230.91.96.nip.io</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">¿Qué puedes hacer?</h2>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📷</div>
+                    <h3>Toma Fotos</h3>
+                    <p>Captura el problema directamente desde tu cámara</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Ubicación Automática</h3>
+                    <p>GPS automático o selección manual en el mapa</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">✍️</div>
+                    <h3>Agrega Descripción</h3>
+                    <p>Describe el incidente con tus propias palabras</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📤</div>
+                    <h3>Envía Reporte</h3>
+                    <p>Envía tu reporte en segundos de forma segura</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>PWA Instalable</h3>
+                    <p>Instala en tu móvil como una app nativa</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Seguro y Privado</h3>
+                    <p>Tus datos protegidos con HTTPS</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Install -->
+    <section class="how-to">
+        <div class="container">
+            <h2 class="section-title">Cómo Instalar</h2>
+
+            <div class="install-tabs">
+                <button class="tab-btn active" data-tab="android">
+                    🤖 Android
+                </button>
+                <button class="tab-btn" data-tab="ios">
+                    🍎 iOS
+                </button>
+                <button class="tab-btn" data-tab="desktop">
+                    💻 Escritorio
+                </button>
+            </div>
+
+            <div class="tab-content active" id="android">
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Abre en Chrome</h3>
+                            <p>Visita <strong>zta.148.230.91.96.nip.io</strong> en Chrome para Android</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Toca el menú</h3>
+                            <p>Toca los tres puntos (⋮) en la esquina superior derecha</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Agregar a pantalla de inicio</h3>
+                            <p>Selecciona "Agregar a pantalla de inicio" o "Instalar app"</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>¡Listo!</h3>
+                            <p>Encuentra el ícono de SUMATE en tu pantalla de inicio</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="ios">
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Abre en Safari</h3>
+                            <p>Visita <strong>zta.148.230.91.96.nip.io</strong> en Safari (iOS)</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Toca Compartir</h3>
+                            <p>Toca el botón de compartir (cuadrado con flecha hacia arriba)</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Agregar a pantalla de inicio</h3>
+                            <p>Desplázate y selecciona "Agregar a pantalla de inicio"</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Confirma</h3>
+                            <p>Toca "Agregar" en la esquina superior derecha</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="desktop">
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Abre en Chrome/Edge</h3>
+                            <p>Visita <strong>zta.148.230.91.96.nip.io</strong> en Chrome o Edge</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Busca el ícono de instalación</h3>
+                            <p>Mira en la barra de direcciones, verás un ícono de instalación (+)</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Haz clic en Instalar</h3>
+                            <p>Aparecerá un popup, haz clic en "Instalar"</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Usa como app</h3>
+                            <p>SUMATE se abrirá en una ventana independiente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>¿Listo para empezar?</h2>
+            <p>Descarga SUMATE ahora y ayuda a mejorar tu ciudad</p>
+            <a href="https://zta.148.230.91.96.nip.io" class="btn btn-primary btn-large">
+                🚀 Abrir SUMATE
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 SUMATE. Todos los derechos reservados.</p>
+            <p class="footer-links">
+                <a href="https://zta.148.230.91.96.nip.io">App</a> •
+                <a href="https://admin.zta.148.230.91.96.nip.io">Admin</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

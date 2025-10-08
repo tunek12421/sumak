@@ -112,6 +112,18 @@ services:
     networks:
       - sumate-network
 
+  # Landing Page (Nginx)
+  landing:
+    build:
+      context: ./landing
+      dockerfile: Dockerfile
+    container_name: sumate-landing
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+    networks:
+      - sumate-network
+
 volumes:
   postgres_data:
     driver: local
