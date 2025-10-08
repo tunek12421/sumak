@@ -68,6 +68,50 @@ services:
     networks:
       - sumate-network
 
+  # Admin Backend API (Go)
+  admin-backend:
+    build:
+      context: ./admin/backend
+      dockerfile: Dockerfile
+    container_name: sumate-admin-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: sumate
+      PORT: 8081
+      BASE_URL: http://localhost:8080
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: SumateAdmin2025!
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sumate-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Admin Frontend (Nginx)
+  admin-frontend:
+    build:
+      context: ./admin/frontend
+      dockerfile: Dockerfile
+    container_name: sumate-admin-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    depends_on:
+      - admin-backend
+    networks:
+      - sumate-network
+
 volumes:
   postgres_data:
     driver: local

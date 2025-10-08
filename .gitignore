@@ -4,6 +4,11 @@ backend/sumate-api
 backend/main
 backend/uploads/
 
+# Admin
+admin/backend/.env
+admin/backend/admin-api
+admin/backend/go.sum
+
 # Go
 *.exe
 *.exe~
