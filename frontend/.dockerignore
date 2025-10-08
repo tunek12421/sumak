@@ -1,0 +1,26 @@
+# Development files
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md
+generate-icons.html
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

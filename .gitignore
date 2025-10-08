@@ -1,0 +1,57 @@
+# Backend
+backend/.env
+backend/sumate-api
+backend/main
+backend/uploads/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# Frontend
+frontend/node_modules/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+
+# Docker
+*.tar
+docker-compose.override.yml
+
+# Database backups
+*.sql
+*.dump
+!backend/database/schema.sql
+
+# Uploads (fotos subidas)
+uploads/

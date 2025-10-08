@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate PWA Icons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: #4CAF50; }
+        .info {
+            background: #E8F5E9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            margin: 10px;
+        }
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .icon-item {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #388E3C;
+        }
+    </style>
+</head>
+<body>
+    <h1>📱 Generador de Iconos PWA</h1>
+
+    <div class="info">
+        <strong>Instrucciones:</strong>
+        <ol>
+            <li>Haz clic en "Generar Iconos"</li>
+            <li>Haz clic derecho en cada icono y selecciona "Guardar imagen como..."</li>
+            <li>Guarda cada icono con su nombre correspondiente en la carpeta <code>/frontend</code></li>
+            <li>O mejor aún, reemplaza estos iconos placeholder con tu logo real</li>
+        </ol>
+    </div>
+
+    <button onclick="generateIcons()">Generar Iconos</button>
+
+    <div id="iconsContainer" class="icons-grid"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+        function generateIcons() {
+            const container = document.getElementById('iconsContainer');
+            container.innerHTML = '';
+
+            sizes.forEach(size => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                // Background
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, '#4CAF50');
+                gradient.addColorStop(1, '#388E3C');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, size, size);
+
+                // Location pin icon
+                ctx.fillStyle = 'white';
+                const pinSize = size * 0.6;
+                const pinX = size / 2;
+                const pinY = size * 0.4;
+
+                // Pin circle
+                ctx.beginPath();
+                ctx.arc(pinX, pinY, pinSize * 0.3, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Pin bottom
+                ctx.beginPath();
+                ctx.moveTo(pinX - pinSize * 0.2, pinY + pinSize * 0.1);
+                ctx.lineTo(pinX, pinY + pinSize * 0.5);
+                ctx.lineTo(pinX + pinSize * 0.2, pinY + pinSize * 0.1);
+                ctx.closePath();
+                ctx.fill();
+
+                // Pin hole
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.arc(pinX, pinY, pinSize * 0.12, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Create download link
+                const iconItem = document.createElement('div');
+                iconItem.className = 'icon-item';
+
+                const img = document.createElement('img');
+                img.src = canvas.toDataURL();
+                img.style.width = '100%';
+                img.style.height = 'auto';
+
+                const label = document.createElement('p');
+                label.textContent = `icon-${size}.png`;
+                label.style.fontSize = '12px';
+                label.style.marginTop = '5px';
+
+                const downloadBtn = document.createElement('button');
+                downloadBtn.textContent = 'Descargar';
+                downloadBtn.style.fontSize = '12px';
+                downloadBtn.style.padding = '5px 10px';
+                downloadBtn.onclick = () => downloadIcon(canvas, size);
+
+                iconItem.appendChild(img);
+                iconItem.appendChild(label);
+                iconItem.appendChild(downloadBtn);
+                container.appendChild(iconItem);
+            });
+        }
+
+        function downloadIcon(canvas, size) {
+            const link = document.createElement('a');
+            link.download = `icon-${size}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Generate on load
+        window.onload = generateIcons;
+    </script>
+</body>
+</html>
