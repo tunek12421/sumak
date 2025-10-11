@@ -92,25 +92,11 @@ func main() {
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	r.Use(cors.New(config))
 
-	// Basic Auth Middleware
-	adminUser := os.Getenv("ADMIN_USER")
-	adminPass := os.Getenv("ADMIN_PASSWORD")
-	if adminUser == "" {
-		adminUser = "admin"
-	}
-	if adminPass == "" {
-		adminPass = "admin123"
-	}
-
-	authorized := r.Group("/", gin.BasicAuth(gin.Accounts{
-		adminUser: adminPass,
-	}))
-
-	// Routes
+	// Routes (temporarily without auth)
 	r.GET("/health", healthCheck)
-	authorized.GET("/api/heatmap", getHeatmapData)
-	authorized.GET("/api/reports", getAllReports)
-	authorized.GET("/api/stats", getStats)
+	r.GET("/api/heatmap", getHeatmapData)
+	r.GET("/api/reports", getAllReports)
+	r.GET("/api/stats", getStats)
 
 	// Start server
 	port := os.Getenv("PORT")

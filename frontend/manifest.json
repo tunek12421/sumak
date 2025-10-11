@@ -1,11 +1,11 @@
 {
-  "name": "SUMATE - Reportes",
-  "short_name": "SUMATE",
+  "name": "SUMAK - Reportes",
+  "short_name": "SUMAK",
   "description": "Aplicación para reportar incidentes con foto y ubicación",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "theme_color": "#667eea",
   "orientation": "portrait",
   "icons": [
     {

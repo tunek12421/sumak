@@ -8,31 +8,6 @@ let map = null;
 let heatmapLayer = null;
 let markersLayer = null;
 let currentMode = 'heatmap';
-let authHeader = null;
-
-// Get credentials from localStorage or prompt
-function getAuthHeader() {
-    if (authHeader) return authHeader;
-
-    const stored = localStorage.getItem('adminAuth');
-    if (stored) {
-        authHeader = stored;
-        return authHeader;
-    }
-
-    const username = prompt('Usuario admin:');
-    const password = prompt('Contraseña:');
-
-    if (!username || !password) {
-        alert('Credenciales requeridas');
-        window.location.reload();
-        return null;
-    }
-
-    authHeader = 'Basic ' + btoa(username + ':' + password);
-    localStorage.setItem('adminAuth', authHeader);
-    return authHeader;
-}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,8 +24,6 @@ function setupEventListeners() {
 }
 
 function logout() {
-    localStorage.removeItem('adminAuth');
-    authHeader = null;
     alert('Sesión cerrada');
     window.location.reload();
 }
@@ -69,36 +42,19 @@ function initializeMap() {
 }
 
 async function loadData() {
-    const auth = getAuthHeader();
-    if (!auth) return;
-
     try {
         // Load stats
-        const statsResponse = await fetch(`${API_URL}/stats`, {
-            headers: { 'Authorization': auth }
-        });
-
-        if (statsResponse.status === 401) {
-            localStorage.removeItem('adminAuth');
-            alert('Credenciales inválidas');
-            window.location.reload();
-            return;
-        }
-
+        const statsResponse = await fetch(`${API_URL}/stats`);
         const stats = await statsResponse.json();
         updateStats(stats);
 
         // Load heatmap data
-        const heatmapResponse = await fetch(`${API_URL}/heatmap`, {
-            headers: { 'Authorization': auth }
-        });
+        const heatmapResponse = await fetch(`${API_URL}/heatmap`);
         const heatmapData = await heatmapResponse.json();
         updateHeatmap(heatmapData);
 
         // Load recent reports
-        const reportsResponse = await fetch(`${API_URL}/reports`, {
-            headers: { 'Authorization': auth }
-        });
+        const reportsResponse = await fetch(`${API_URL}/reports`);
         const reports = await reportsResponse.json();
         updateReports(reports);
 
