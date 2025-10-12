@@ -94,9 +94,14 @@ func main() {
 
 	// Routes (temporarily without auth)
 	r.GET("/health", healthCheck)
-	r.GET("/api/heatmap", getHeatmapData)
-	r.GET("/api/reports", getAllReports)
-	r.GET("/api/stats", getStats)
+
+	// Admin API routes with prefix
+	adminAPI := r.Group("/admin-api")
+	{
+		adminAPI.GET("/heatmap", getHeatmapData)
+		adminAPI.GET("/reports", getAllReports)
+		adminAPI.GET("/stats", getStats)
+	}
 
 	// Start server
 	port := os.Getenv("PORT")
