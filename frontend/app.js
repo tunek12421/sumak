@@ -384,10 +384,10 @@ function resetForm() {
 
     // Reset location
     currentLocation = null;
-    latitude.value = '';
-    longitude.value = '';
     locationStatus.textContent = '';
     locationStatus.className = 'location-status';
+    mapStatus.textContent = '';
+    mapStatus.className = 'location-status';
 
     // Reset validation
     checkValidation();

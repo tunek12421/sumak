@@ -37,7 +37,7 @@ services:
       DB_PASSWORD: postgres
       DB_NAME: sumate
       PORT: 8080
-      BASE_URL: http://localhost:8080
+      BASE_URL: https://zta.148.230.91.96.nip.io
       UPLOADS_DIR: /root/uploads
     ports:
       - "8080:8080"
@@ -82,7 +82,7 @@ services:
       DB_PASSWORD: postgres
       DB_NAME: sumate
       PORT: 8081
-      BASE_URL: http://localhost:8080
+      BASE_URL: https://zta.148.230.91.96.nip.io
       ADMIN_USER: admin
       ADMIN_PASSWORD: SumateAdmin2025!
     ports:
