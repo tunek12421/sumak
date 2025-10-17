@@ -13,8 +13,8 @@ let currentMode = 'heatmap';
 // Pagination state
 let currentZonePage = 1;
 let currentReportPage = 1;
-const ZONES_PER_PAGE = 7;
-const REPORTS_PER_PAGE = 7;
+const ZONES_PER_PAGE = 4;
+const REPORTS_PER_PAGE = 4;
 let allZones = [];
 let allReports = [];
 
@@ -58,15 +58,23 @@ async function loadData() {
         const stats = await statsResponse.json();
         updateStats(stats);
 
-        // Load heatmap data
-        const heatmapResponse = await fetch(`${API_URL}/heatmap`);
-        const heatmapData = await heatmapResponse.json();
-        updateHeatmap(heatmapData);
+        // Use top_zones from stats for the map (zones, not individual markers)
+        if (stats.top_zones && stats.top_zones.length > 0) {
+            const zonesData = stats.top_zones.map(zone => ({
+                lat: zone.latitude,
+                lng: zone.longitude,
+                intensity: zone.count
+            }));
+            updateHeatmap(zonesData);
+        }
 
-        // Load recent reports
+        // Load all reports for individual markers mode
         const reportsResponse = await fetch(`${API_URL}/reports`);
         const reports = await reportsResponse.json();
         updateReports(reports);
+
+        // Store reports for markers mode
+        window.allReportsForMarkers = reports;
 
     } catch (error) {
         console.error('Error loading data:', error);
@@ -171,44 +179,93 @@ function updateHeatmap(data) {
     const heatData = data.map(point => {
         // Create a circle for each cluster/zone
         const intensity = point.intensity;
-        const radius = Math.min(300 + (intensity * 50), 800); // 300-800 meters
+        const radius = Math.min(150 + (intensity * 30), 400); // 150-400 meters (más pequeños)
 
-        // Color based on intensity
-        let color;
+        // Color based on intensity - más vibrantes y distintivos
+        let color, fillOpacity;
         const normalized = intensity / maxIntensity;
-        if (normalized >= 0.7) color = '#FF0000'; // Red for high
-        else if (normalized >= 0.5) color = '#FFA500'; // Orange
-        else if (normalized >= 0.3) color = '#FFFF00'; // Yellow
-        else color = '#00FF00'; // Green for low
+        if (normalized >= 0.7) {
+            color = '#DC2626'; // Rojo más oscuro
+            fillOpacity = 0.25;
+        } else if (normalized >= 0.5) {
+            color = '#EA580C'; // Naranja más fuerte
+            fillOpacity = 0.2;
+        } else if (normalized >= 0.3) {
+            color = '#F59E0B'; // Amarillo-naranja
+            fillOpacity = 0.18;
+        } else {
+            color = '#10B981'; // Verde
+            fillOpacity = 0.15;
+        }
 
         const circle = L.circle([point.lat, point.lng], {
             color: color,
             fillColor: color,
-            fillOpacity: 0.3,
+            fillOpacity: fillOpacity,
             radius: radius,
-            weight: 2
+            weight: 3,
+            opacity: 0.8
         });
 
         circle.bindPopup(`
             <div style="text-align: center;">
-                <strong style="font-size: 16px;">🔥 Zona Crítica</strong><br>
-                <strong>${intensity}</strong> reportes<br>
+                <strong style="font-size: 16px; color: ${color};">🔥 Zona Crítica</strong><br>
+                <strong style="font-size: 18px;">${intensity}</strong> reportes<br>
                 <small>${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}</small>
             </div>
         `);
 
         zonesCircles.addLayer(circle);
 
-        // Create marker for markers mode
-        const marker = L.marker([point.lat, point.lng]);
-        marker.bindPopup(`
-            <strong>Reportes:</strong> ${intensity}<br>
-            <strong>Ubicación:</strong> ${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}
+        // Agregar marcador con número en el centro
+        const divIcon = L.divIcon({
+            html: `<div style="
+                background: ${color};
+                color: white;
+                border: 2px solid white;
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 14px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            ">${intensity}</div>`,
+            className: 'zone-marker',
+            iconSize: [35, 35]
+        });
+
+        const numberMarker = L.marker([point.lat, point.lng], { icon: divIcon });
+        numberMarker.bindPopup(`
+            <div style="text-align: center;">
+                <strong style="font-size: 16px; color: ${color};">🔥 Zona Crítica</strong><br>
+                <strong style="font-size: 18px;">${intensity}</strong> reportes<br>
+                <small>${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}</small>
+            </div>
         `);
-        markersLayer.addLayer(marker);
+        zonesCircles.addLayer(numberMarker);
 
         return [point.lat, point.lng, intensity];
     });
+
+    // Create individual markers for all reports (for markers mode)
+    if (window.allReportsForMarkers) {
+        markersLayer.clearLayers();
+        window.allReportsForMarkers.forEach(report => {
+            const marker = L.marker([report.latitude, report.longitude]);
+            marker.bindPopup(`
+                <div style="max-width: 200px;">
+                    <strong>Reporte Individual</strong><br>
+                    <p style="margin: 5px 0;">${report.description}</p>
+                    <img src="${report.photo_url}" style="width: 100%; border-radius: 4px; margin: 5px 0;" onerror="this.style.display='none'"><br>
+                    <small>${new Date(report.created_at).toLocaleDateString('es-BO')}</small>
+                </div>
+            `);
+            markersLayer.addLayer(marker);
+        });
+    }
 
     // Create heatmap layer (for backward compatibility)
     heatmapLayer = L.heatLayer(heatData, {
