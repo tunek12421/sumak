@@ -58,6 +58,17 @@ async function loadData() {
         const stats = await statsResponse.json();
         updateStats(stats);
 
+        // Load all reports first for individual markers mode
+        const reportsResponse = await fetch(`${API_URL}/reports`);
+        const reports = await reportsResponse.json();
+        updateReports(reports);
+
+        // Store reports for markers mode
+        window.allReportsForMarkers = reports;
+
+        // Create individual markers layer
+        createIndividualMarkers();
+
         // Use top_zones from stats for the map (zones, not individual markers)
         if (stats.top_zones && stats.top_zones.length > 0) {
             const zonesData = stats.top_zones.map(zone => ({
@@ -67,14 +78,6 @@ async function loadData() {
             }));
             updateHeatmap(zonesData);
         }
-
-        // Load all reports for individual markers mode
-        const reportsResponse = await fetch(`${API_URL}/reports`);
-        const reports = await reportsResponse.json();
-        updateReports(reports);
-
-        // Store reports for markers mode
-        window.allReportsForMarkers = reports;
 
     } catch (error) {
         console.error('Error loading data:', error);
@@ -156,6 +159,27 @@ function updateZonesPagination() {
     }
 
     paginationContainer.innerHTML = paginationHTML;
+}
+
+// Create individual markers for all reports
+function createIndividualMarkers() {
+    if (!window.allReportsForMarkers) {
+        return;
+    }
+
+    markersLayer.clearLayers();
+    window.allReportsForMarkers.forEach(report => {
+        const marker = L.marker([report.latitude, report.longitude]);
+        marker.bindPopup(`
+            <div style="max-width: 200px;">
+                <strong>Reporte Individual</strong><br>
+                <p style="margin: 5px 0;">${escapeHtml(report.description)}</p>
+                <img src="${report.photo_url}" style="width: 100%; border-radius: 4px; margin: 5px 0;" onerror="this.style.display='none'"><br>
+                <small>${new Date(report.created_at).toLocaleDateString('es-BO')}</small>
+            </div>
+        `);
+        markersLayer.addLayer(marker);
+    });
 }
 
 function updateHeatmap(data) {
@@ -249,23 +273,6 @@ function updateHeatmap(data) {
 
         return [point.lat, point.lng, intensity];
     });
-
-    // Create individual markers for all reports (for markers mode)
-    if (window.allReportsForMarkers) {
-        markersLayer.clearLayers();
-        window.allReportsForMarkers.forEach(report => {
-            const marker = L.marker([report.latitude, report.longitude]);
-            marker.bindPopup(`
-                <div style="max-width: 200px;">
-                    <strong>Reporte Individual</strong><br>
-                    <p style="margin: 5px 0;">${report.description}</p>
-                    <img src="${report.photo_url}" style="width: 100%; border-radius: 4px; margin: 5px 0;" onerror="this.style.display='none'"><br>
-                    <small>${new Date(report.created_at).toLocaleDateString('es-BO')}</small>
-                </div>
-            `);
-            markersLayer.addLayer(marker);
-        });
-    }
 
     // Create heatmap layer (for backward compatibility)
     heatmapLayer = L.heatLayer(heatData, {
