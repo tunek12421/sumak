@@ -7,7 +7,16 @@ const API_URL = window.location.hostname === 'localhost'
 let map = null;
 let heatmapLayer = null;
 let markersLayer = null;
+let zonesCircles = null;
 let currentMode = 'heatmap';
+
+// Pagination state
+let currentZonePage = 1;
+let currentReportPage = 1;
+const ZONES_PER_PAGE = 7;
+const REPORTS_PER_PAGE = 7;
+let allZones = [];
+let allReports = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -39,6 +48,7 @@ function initializeMap() {
 
     // Initialize layers
     markersLayer = L.layerGroup().addTo(map);
+    zonesCircles = L.layerGroup().addTo(map);
 }
 
 async function loadData() {
@@ -70,16 +80,27 @@ function updateStats(stats) {
     document.getElementById('weekReports').textContent = stats.this_week || 0;
     document.getElementById('monthReports').textContent = stats.this_month || 0;
 
-    // Update top zones
+    // Store all zones and display first page
+    allZones = stats.top_zones || [];
+    displayZonesPage(1);
+}
+
+function displayZonesPage(page) {
+    currentZonePage = page;
     const topZonesContainer = document.getElementById('topZones');
-    if (!stats.top_zones || stats.top_zones.length === 0) {
-        topZonesContainer.innerHTML = '<p class="empty">No hay suficientes datos para mostrar zonas calientes</p>';
+
+    if (allZones.length === 0) {
+        topZonesContainer.innerHTML = '<p class="empty">No hay suficientes datos para mostrar zonas críticas</p>';
         return;
     }
 
-    topZonesContainer.innerHTML = stats.top_zones.map((zone, index) => `
+    const start = (page - 1) * ZONES_PER_PAGE;
+    const end = start + ZONES_PER_PAGE;
+    const zonesPage = allZones.slice(start, end);
+
+    topZonesContainer.innerHTML = zonesPage.map((zone, index) => `
         <div class="zone-card">
-            <div class="zone-rank">#${index + 1}</div>
+            <div class="zone-rank">#${start + index + 1}</div>
             <div class="zone-info">
                 <div class="zone-name">${zone.area}</div>
                 <div class="zone-location">
@@ -94,34 +115,107 @@ function updateStats(stats) {
             </button>
         </div>
     `).join('');
+
+    // Update pagination
+    updateZonesPagination();
+}
+
+function updateZonesPagination() {
+    const paginationContainer = document.getElementById('zonesPagination');
+    const totalPages = Math.ceil(allZones.length / ZONES_PER_PAGE);
+
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    let paginationHTML = '';
+
+    // Previous button
+    if (currentZonePage > 1) {
+        paginationHTML += `<button class="page-btn" onclick="displayZonesPage(${currentZonePage - 1})">← Anterior</button>`;
+    }
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const activeClass = i === currentZonePage ? 'active' : '';
+        paginationHTML += `<button class="page-btn ${activeClass}" onclick="displayZonesPage(${i})">${i}</button>`;
+    }
+
+    // Next button
+    if (currentZonePage < totalPages) {
+        paginationHTML += `<button class="page-btn" onclick="displayZonesPage(${currentZonePage + 1})">Siguiente →</button>`;
+    }
+
+    paginationContainer.innerHTML = paginationHTML;
 }
 
 function updateHeatmap(data) {
-    // Remove old heatmap
+    // Remove old layers
     if (heatmapLayer) {
         map.removeLayer(heatmapLayer);
     }
 
-    // Clear markers
+    // Clear markers and circles
     markersLayer.clearLayers();
+    zonesCircles.clearLayers();
 
     if (!data || data.length === 0) {
         return;
     }
 
-    // Prepare heatmap data
-    const heatData = data.map(point => [
-        point.lat,
-        point.lng,
-        point.intensity
-    ]);
+    // Get max intensity for color scaling
+    const maxIntensity = Math.max(...data.map(p => p.intensity));
 
-    // Create heatmap layer
+    // Prepare heatmap data and create circles
+    const heatData = data.map(point => {
+        // Create a circle for each cluster/zone
+        const intensity = point.intensity;
+        const radius = Math.min(300 + (intensity * 50), 800); // 300-800 meters
+
+        // Color based on intensity
+        let color;
+        const normalized = intensity / maxIntensity;
+        if (normalized >= 0.7) color = '#FF0000'; // Red for high
+        else if (normalized >= 0.5) color = '#FFA500'; // Orange
+        else if (normalized >= 0.3) color = '#FFFF00'; // Yellow
+        else color = '#00FF00'; // Green for low
+
+        const circle = L.circle([point.lat, point.lng], {
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.3,
+            radius: radius,
+            weight: 2
+        });
+
+        circle.bindPopup(`
+            <div style="text-align: center;">
+                <strong style="font-size: 16px;">🔥 Zona Crítica</strong><br>
+                <strong>${intensity}</strong> reportes<br>
+                <small>${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}</small>
+            </div>
+        `);
+
+        zonesCircles.addLayer(circle);
+
+        // Create marker for markers mode
+        const marker = L.marker([point.lat, point.lng]);
+        marker.bindPopup(`
+            <strong>Reportes:</strong> ${intensity}<br>
+            <strong>Ubicación:</strong> ${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}
+        `);
+        markersLayer.addLayer(marker);
+
+        return [point.lat, point.lng, intensity];
+    });
+
+    // Create heatmap layer (for backward compatibility)
     heatmapLayer = L.heatLayer(heatData, {
         radius: 25,
         blur: 35,
         maxZoom: 17,
-        max: Math.max(...data.map(p => p.intensity)),
+        max: maxIntensity,
         gradient: {
             0.0: 'blue',
             0.3: 'cyan',
@@ -131,35 +225,38 @@ function updateHeatmap(data) {
         }
     });
 
-    // Create markers
-    data.forEach(point => {
-        const marker = L.marker([point.lat, point.lng]);
-        marker.bindPopup(`
-            <strong>Reportes:</strong> ${point.intensity}<br>
-            <strong>Ubicación:</strong> ${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}
-        `);
-        markersLayer.addLayer(marker);
-    });
-
-    // Show current mode
+    // Show current mode - default to zones/circles in heatmap mode
     if (currentMode === 'heatmap') {
-        map.addLayer(heatmapLayer);
+        map.addLayer(zonesCircles); // Show circles instead of heatmap
         map.removeLayer(markersLayer);
+        if (heatmapLayer) map.removeLayer(heatmapLayer);
     } else {
-        map.removeLayer(heatmapLayer);
+        map.removeLayer(zonesCircles);
+        if (heatmapLayer) map.removeLayer(heatmapLayer);
         map.addLayer(markersLayer);
     }
 }
 
 function updateReports(reports) {
+    // Store all reports and display first page
+    allReports = reports || [];
+    displayReportsPage(1);
+}
+
+function displayReportsPage(page) {
+    currentReportPage = page;
     const container = document.getElementById('recentReports');
 
-    if (!reports || reports.length === 0) {
+    if (allReports.length === 0) {
         container.innerHTML = '<p class="empty">No hay reportes</p>';
         return;
     }
 
-    container.innerHTML = reports.slice(0, 20).map(report => {
+    const start = (page - 1) * REPORTS_PER_PAGE;
+    const end = start + REPORTS_PER_PAGE;
+    const reportsPage = allReports.slice(start, end);
+
+    container.innerHTML = reportsPage.map(report => {
         const date = new Date(report.created_at);
         const formattedDate = date.toLocaleString('es-BO', {
             year: 'numeric',
@@ -184,6 +281,39 @@ function updateReports(reports) {
             </div>
         `;
     }).join('');
+
+    // Update pagination
+    updateReportsPagination();
+}
+
+function updateReportsPagination() {
+    const paginationContainer = document.getElementById('reportsPagination');
+    const totalPages = Math.ceil(allReports.length / REPORTS_PER_PAGE);
+
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    let paginationHTML = '';
+
+    // Previous button
+    if (currentReportPage > 1) {
+        paginationHTML += `<button class="page-btn" onclick="displayReportsPage(${currentReportPage - 1})">← Anterior</button>`;
+    }
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const activeClass = i === currentReportPage ? 'active' : '';
+        paginationHTML += `<button class="page-btn ${activeClass}" onclick="displayReportsPage(${i})">${i}</button>`;
+    }
+
+    // Next button
+    if (currentReportPage < totalPages) {
+        paginationHTML += `<button class="page-btn" onclick="displayReportsPage(${currentReportPage + 1})">Siguiente →</button>`;
+    }
+
+    paginationContainer.innerHTML = paginationHTML;
 }
 
 function switchMode(mode) {
@@ -195,9 +325,13 @@ function switchMode(mode) {
 
     // Switch layers
     if (mode === 'heatmap') {
-        if (heatmapLayer) map.addLayer(heatmapLayer);
+        // Show zones/circles
+        map.addLayer(zonesCircles);
         map.removeLayer(markersLayer);
+        if (heatmapLayer) map.removeLayer(heatmapLayer);
     } else {
+        // Show markers
+        map.removeLayer(zonesCircles);
         if (heatmapLayer) map.removeLayer(heatmapLayer);
         map.addLayer(markersLayer);
     }
