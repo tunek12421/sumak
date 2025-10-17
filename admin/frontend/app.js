@@ -188,8 +188,7 @@ function updateHeatmap(data) {
         map.removeLayer(heatmapLayer);
     }
 
-    // Clear markers and circles
-    markersLayer.clearLayers();
+    // Clear only circles (don't clear markers, they're created separately)
     zonesCircles.clearLayers();
 
     if (!data || data.length === 0) {
