@@ -171,7 +171,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('SUMAK', options)
+    self.registration.showNotification('SUMAQ', options)
   );
 });
 

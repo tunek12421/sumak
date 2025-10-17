@@ -1,6 +1,6 @@
 {
-  "name": "SUMAK - Reportes",
-  "short_name": "SUMAK",
+  "name": "SUMAQ - Reportes",
+  "short_name": "SUMAQ",
   "description": "Aplicación para reportar incidentes con foto y ubicación",
   "start_url": "/",
   "display": "standalone",
