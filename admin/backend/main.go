@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"time"
@@ -48,6 +49,91 @@ type ZoneStats struct {
 	Longitude float64 `json:"longitude"`
 	Count     int     `json:"count"`
 	Area      string  `json:"area"`
+}
+
+type ReportPoint struct {
+	Latitude  float64
+	Longitude float64
+	ID        string
+}
+
+// Calcula la distancia en kilómetros entre dos puntos GPS usando la fórmula de Haversine
+func haversineDistance(lat1, lon1, lat2, lon2 float64) float64 {
+	const earthRadius = 6371 // Radio de la Tierra en km
+
+	// Convertir grados a radianes
+	lat1Rad := lat1 * math.Pi / 180
+	lat2Rad := lat2 * math.Pi / 180
+	deltaLat := (lat2 - lat1) * math.Pi / 180
+	deltaLon := (lon2 - lon1) * math.Pi / 180
+
+	// Fórmula de Haversine
+	a := math.Sin(deltaLat/2)*math.Sin(deltaLat/2) +
+		math.Cos(lat1Rad)*math.Cos(lat2Rad)*
+			math.Sin(deltaLon/2)*math.Sin(deltaLon/2)
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+
+	return earthRadius * c
+}
+
+// Agrupa reportes por proximidad geográfica (clustering)
+func clusterReports(reports []ReportPoint, radiusKm float64) []ZoneStats {
+	if len(reports) == 0 {
+		return []ZoneStats{}
+	}
+
+	visited := make(map[int]bool)
+	clusters := []ZoneStats{}
+
+	for i, report := range reports {
+		if visited[i] {
+			continue
+		}
+
+		// Crear nuevo cluster
+		cluster := ZoneStats{
+			Latitude:  report.Latitude,
+			Longitude: report.Longitude,
+			Count:     1,
+		}
+		visited[i] = true
+
+		// Buscar reportes cercanos
+		var sumLat, sumLon float64
+		sumLat = report.Latitude
+		sumLon = report.Longitude
+
+		for j, other := range reports {
+			if visited[j] {
+				continue
+			}
+
+			distance := haversineDistance(report.Latitude, report.Longitude, other.Latitude, other.Longitude)
+			if distance <= radiusKm {
+				cluster.Count++
+				sumLat += other.Latitude
+				sumLon += other.Longitude
+				visited[j] = true
+			}
+		}
+
+		// Calcular centroide del cluster
+		cluster.Latitude = sumLat / float64(cluster.Count)
+		cluster.Longitude = sumLon / float64(cluster.Count)
+
+		clusters = append(clusters, cluster)
+	}
+
+	// Ordenar clusters por cantidad de reportes (descendente)
+	for i := 0; i < len(clusters)-1; i++ {
+		for j := i + 1; j < len(clusters); j++ {
+			if clusters[j].Count > clusters[i].Count {
+				clusters[i], clusters[j] = clusters[j], clusters[i]
+			}
+		}
+	}
+
+	return clusters
 }
 
 func main() {
@@ -236,25 +322,32 @@ func getStats(c *gin.Context) {
 		}
 	}
 
-	// Top zones (clustered by proximity)
+	// Top zones (clustered by geographical proximity)
 	rows, err = db.Query(`
-		SELECT
-			ROUND(CAST(latitude AS numeric), 3) as lat,
-			ROUND(CAST(longitude AS numeric), 3) as lng,
-			COUNT(*) as count
+		SELECT latitude, longitude
 		FROM reports
-		GROUP BY lat, lng
-		HAVING COUNT(*) > 1
-		ORDER BY count DESC
-		LIMIT 10
 	`)
 	if err == nil {
 		defer rows.Close()
+		var allReports []ReportPoint
 		for rows.Next() {
-			var zone ZoneStats
-			rows.Scan(&zone.Latitude, &zone.Longitude, &zone.Count)
-			zone.Area = "Zona " + string(rune(65+len(stats.TopZones))) // A, B, C...
-			stats.TopZones = append(stats.TopZones, zone)
+			var report ReportPoint
+			rows.Scan(&report.Latitude, &report.Longitude)
+			allReports = append(allReports, report)
+		}
+
+		// Realizar clustering con radio de 1.5 km
+		clusters := clusterReports(allReports, 1.5)
+
+		// Tomar solo los top 10 clusters
+		maxClusters := 10
+		if len(clusters) < maxClusters {
+			maxClusters = len(clusters)
+		}
+
+		for i := 0; i < maxClusters; i++ {
+			clusters[i].Area = "Zona " + string(rune(65+i)) // A, B, C...
+			stats.TopZones = append(stats.TopZones, clusters[i])
 		}
 	}
 

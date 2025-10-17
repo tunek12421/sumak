@@ -1,5 +1,5 @@
 // Manejador principal de mensajes
-const { CONVERSATION_STATES, LIMITES } = require('../../config/constants');
+const { CONVERSATION_STATES, LIMITES, GREETING_KEYWORDS } = require('../../config/constants');
 const { calculateReadTime, calculateTypingTime, getRandomElement } = require('../utils/timing-utils');
 const { SALUDOS } = require('../../config/constants');
 const {
@@ -7,20 +7,33 @@ const {
     generateLocationRequestMessage,
     generatePhotoRequestMessage,
     generateSuccessMessage,
-    generateErrorMessage
+    generateErrorMessage,
+    generateInvalidPotholeMessage
 } = require('./message-generator');
 const BackendService = require('./backend-service');
+const PotholeValidator = require('./pothole-validator');
 
 class MessageHandler {
     constructor(userDataManager, rateLimiter) {
         this.userDataManager = userDataManager;
         this.rateLimiter = rateLimiter;
         this.backendService = new BackendService();
+        this.potholeValidator = new PotholeValidator();
         this.monitor = null;
     }
 
     setMonitor(monitor) {
         this.monitor = monitor;
+    }
+
+    /**
+     * Verifica si el mensaje es un saludo inicial
+     * @param {string} text - Texto del mensaje
+     * @returns {boolean}
+     */
+    isGreeting(text) {
+        const normalizedText = text.toLowerCase().trim();
+        return GREETING_KEYWORDS.some(keyword => normalizedText === keyword || normalizedText.includes(keyword));
     }
 
     async handleMessage(message, chat, client) {
@@ -62,7 +75,32 @@ class MessageHandler {
     }
 
     async handleInitialState(message, chat, phoneNumber, messageText, userData) {
-        console.log('   📝 Estado INITIAL: Guardando descripción del reporte');
+        // Verificar si es un saludo inicial
+        if (this.isGreeting(messageText)) {
+            console.log('   👋 Saludo inicial detectado');
+            const response = generateInitialMessage();
+            await this.sendTypingResponse(chat, message, response);
+            return;
+        }
+
+        console.log('   📝 Estado INITIAL: Validando descripción del reporte');
+
+        // Validar que sea un reporte de bache usando IA
+        console.log('   🤖 Validando con IA si es un reporte de bache...');
+        const validation = await this.potholeValidator.validatePotholeReport(messageText);
+
+        if (!validation.isValid) {
+            console.log('   ❌ Reporte rechazado: No es un bache');
+            console.log(`   📝 Razón: ${validation.reason || 'No especificada'}`);
+
+            const response = generateInvalidPotholeMessage(validation.reason);
+            await this.sendTypingResponse(chat, message, response);
+
+            // No guardar datos, mantener el estado INITIAL para que pueda intentar de nuevo
+            return;
+        }
+
+        console.log('   ✅ Validación exitosa: Es un reporte de bache');
 
         // Guardar la descripción
         userData = this.userDataManager.updateUserData(phoneNumber, {

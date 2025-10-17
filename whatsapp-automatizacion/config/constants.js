@@ -36,6 +36,26 @@ const SALUDOS = [
     "¡Hola, bienvenido/a!"
 ];
 
+// Palabras clave para detectar saludos de inicio
+const GREETING_KEYWORDS = [
+    'hola',
+    'buenos dias',
+    'buenas tardes',
+    'buenas noches',
+    'buen dia',
+    'buena tarde',
+    'buena noche',
+    'saludos',
+    'inicio',
+    'iniciar',
+    'empezar',
+    'comenzar',
+    'menu',
+    'menú',
+    'ayuda',
+    'help'
+];
+
 const TRANSICIONES = [
     "He analizado tu consulta y",
     "Según tu mensaje,",
@@ -54,6 +74,7 @@ module.exports = {
     DELAYS,
     LIMITES,
     SALUDOS,
+    GREETING_KEYWORDS,
     TRANSICIONES,
     BACKEND_CONFIG
 };

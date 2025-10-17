@@ -5,53 +5,53 @@ const { getRandomElement } = require('../utils/timing-utils');
 function generateInitialMessage() {
     const saludo = getRandomElement(SALUDOS);
 
-    return `${saludo} Bienvenido al sistema de reportes ciudadanos.
+    return `${saludo} Bienvenido al sistema de reportes de **baches**.
 
-📝 Para registrar tu reporte, necesito que me cuentes:
+📝 Para registrar tu reporte de bache, necesito que me cuentes:
 
-**¿Qué problema quieres reportar?**
+**¿Dónde está el bache y qué tan grave es?**
 
-Por favor, descríbeme la situación con el mayor detalle posible.
+Por favor, descríbeme el bache con el mayor detalle posible.
 
 💡 Ejemplo:
 \`\`\`
-Hay basura acumulada en la esquina de la Av. América
+Bache grande en la Av. América esquina 6 de Agosto, muy profundo y peligroso
 \`\`\``;
 }
 
 function generateLocationRequestMessage() {
-    return `📍 Perfecto. Ahora necesito saber la ubicación del problema.
+    return `📍 Perfecto. Ahora necesito saber dónde está ubicado el bache.
 
 Por favor, **comparte tu ubicación** usando el botón de adjuntar (📎) → Ubicación.
 
 💡 Puedes enviar:
-• Tu ubicación actual (si estás en el lugar)
-• La ubicación exacta del problema en el mapa`;
+• Tu ubicación actual (si estás junto al bache)
+• La ubicación exacta del bache en el mapa`;
 }
 
 function generatePhotoRequestMessage() {
-    return `📷 Excelente. Por último, necesito una foto del problema.
+    return `📷 Excelente. Por último, necesito una foto del bache.
 
-Por favor, envía una **foto** que muestre claramente la situación.
+Por favor, envía una **foto** que muestre claramente el bache.
 
-💡 Consejo: Toma una foto clara y bien iluminada del problema.`;
+💡 Consejo: Toma una foto clara y bien iluminada donde se vea el tamaño y profundidad del bache.`;
 }
 
 function generateSuccessMessage(reportId) {
-    return `✅ **¡Reporte registrado exitosamente!**
+    return `✅ **¡Reporte de bache registrado exitosamente!**
 
 📋 ID del reporte: \`${reportId}\`
 
-Tu reporte ha sido enviado al sistema municipal y será atendido a la brevedad posible.
+Tu reporte de bache ha sido enviado al sistema municipal y será atendido a la brevedad posible.
 
-¡Gracias por contribuir a mejorar nuestra ciudad! 🏙️
+¡Gracias por ayudarnos a mantener las calles en buen estado! 🛣️
 
 ---
-Si deseas hacer otro reporte, simplemente escribe "hola" para comenzar de nuevo.`;
+Si deseas reportar otro bache, simplemente escribe "hola" para comenzar de nuevo.`;
 }
 
 function generateErrorMessage() {
-    return `❌ **Hubo un problema al registrar tu reporte.**
+    return `❌ **Hubo un problema al registrar tu reporte de bache.**
 
 Por favor, intenta nuevamente escribiendo "hola" para reiniciar el proceso.
 
@@ -72,6 +72,19 @@ function generarMensajeRateLimitExcedido() {
     return 'Por favor, espera unos minutos antes de enviar otro mensaje. Gracias por tu comprensión. 🙏';
 }
 
+function generateInvalidPotholeMessage(reason) {
+    return `⚠️ **Este no parece ser un reporte de bache.**
+
+${reason ? `📝 Razón: ${reason}` : ''}
+
+Este sistema está diseñado específicamente para reportar **baches** (huecos o deterioros en el pavimento de calles y avenidas).
+
+💡 Si deseas reportar un bache, por favor escribe "hola" y descríbelo correctamente.
+
+📞 Para otros tipos de reportes ciudadanos, comunícate con la Alcaldía/Gobernación:
+👉 https://wa.me/59161561515`;
+}
+
 module.exports = {
     generateInitialMessage,
     generateLocationRequestMessage,
@@ -79,5 +92,6 @@ module.exports = {
     generateSuccessMessage,
     generateErrorMessage,
     generarMensajeHorarioAtencion,
-    generarMensajeRateLimitExcedido
+    generarMensajeRateLimitExcedido,
+    generateInvalidPotholeMessage
 };
