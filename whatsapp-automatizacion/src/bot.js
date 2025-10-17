@@ -73,8 +73,12 @@ client.on('loading_screen', (percent, message) => {
     console.log(`⏳ Cargando: ${percent}% - ${message}`);
 });
 
+// Variable para guardar el timestamp de inicio
+let botReadyTimestamp = null;
+
 // Cliente listo
 client.on('ready', () => {
+    botReadyTimestamp = Math.floor(Date.now() / 1000); // Guardar timestamp en segundos
     console.log('✅ Cliente de WhatsApp conectado y listo!');
     console.log('📱 Esperando mensajes...\n');
 });
@@ -83,6 +87,12 @@ client.on('ready', () => {
 client.on('message', async (message) => {
     // Ignorar mensajes propios y de grupos
     if (message.fromMe || message.from.includes('@g.us')) return;
+
+    // Ignorar mensajes anteriores al inicio del bot (mensajes del historial)
+    if (botReadyTimestamp && message.timestamp < botReadyTimestamp) {
+        console.log('⏭️  Mensaje antiguo ignorado (historial)');
+        return;
+    }
 
     // Ignorar mensajes vacíos (pero no los que tienen media/ubicación)
     if (!message.body && !message.hasMedia && !message.location) {
