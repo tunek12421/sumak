@@ -295,9 +295,9 @@ func savePhoto(base64Photo string) (string, error) {
 		return "", fmt.Errorf("invalid base64 data: %v", err)
 	}
 
-	// Validate file size (max 10MB)
-	if len(photoData) > 10*1024*1024 {
-		return "", fmt.Errorf("file too large (max 10MB)")
+	// Validate file size (max 20MB)
+	if len(photoData) > 20*1024*1024 {
+		return "", fmt.Errorf("file too large (max 20MB)")
 	}
 
 	// Detect image type and set extension

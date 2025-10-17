@@ -122,9 +122,9 @@ function handlePhotoSelect(e) {
         return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showMessage('La imagen no debe superar los 5MB', 'error');
+    // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+        showMessage('La imagen no debe superar los 20MB', 'error');
         return;
     }
 
@@ -349,8 +349,30 @@ async function handleSubmit() {
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Error al enviar el reporte');
+            // Handle different error status codes
+            let errorMessage = 'Error al enviar el reporte';
+
+            if (response.status === 413) {
+                errorMessage = 'La imagen es demasiado grande. Por favor, intenta con una imagen más pequeña.';
+            } else if (response.status >= 500) {
+                errorMessage = 'Error del servidor. Por favor, intenta nuevamente.';
+            } else {
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const error = await response.json();
+                        errorMessage = error.error || errorMessage;
+                    } else {
+                        // Server returned HTML or other non-JSON response
+                        errorMessage = `Error del servidor (${response.status}). Por favor, intenta nuevamente.`;
+                    }
+                } catch (e) {
+                    // Failed to parse error response
+                    errorMessage = `Error del servidor (${response.status}). Por favor, intenta nuevamente.`;
+                }
+            }
+
+            throw new Error(errorMessage);
         }
 
         const result = await response.json();
