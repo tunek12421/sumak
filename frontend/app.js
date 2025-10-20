@@ -327,17 +327,24 @@ async function handleSubmit() {
         return;
     }
 
+    // Validate location has required properties (iOS Safari compatibility)
+    if (!currentLocation.latitude || !currentLocation.longitude) {
+        showMessage('Error: Ubicación inválida. Por favor, obtén la ubicación nuevamente.', 'error');
+        return;
+    }
+
     // Show loading
     submitBtn.disabled = true;
     loadingIndicator.style.display = 'block';
     message.style.display = 'none';
 
     try {
+        // Create report data with explicit type checking for iOS Safari
         const reportData = {
-            description: description.value.trim(),
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            photo: selectedPhoto
+            description: String(description.value.trim()),
+            latitude: Number(currentLocation.latitude),
+            longitude: Number(currentLocation.longitude),
+            photo: String(selectedPhoto)
         };
 
         const response = await fetch(`${API_URL}/reports`, {
@@ -458,7 +465,20 @@ async function loadReports() {
 }
 
 function createReportCard(report) {
-    const date = new Date(report.created_at);
+    // iOS Safari compatibility: Validate report object has required properties
+    if (!report || typeof report !== 'object') {
+        console.error('Invalid report object:', report);
+        return '';
+    }
+
+    // Defensive validation for iOS Safari
+    const latitude = Number(report.latitude) || 0;
+    const longitude = Number(report.longitude) || 0;
+    const photoUrl = String(report.photo_url || '');
+    const description = String(report.description || 'Sin descripción');
+    const createdAt = report.created_at || new Date().toISOString();
+
+    const date = new Date(createdAt);
     const formattedDate = date.toLocaleString('es-AR', {
         year: 'numeric',
         month: 'long',
@@ -467,17 +487,17 @@ function createReportCard(report) {
         minute: '2-digit'
     });
 
-    const mapsUrl = `https://www.google.com/maps?q=${report.latitude},${report.longitude}`;
+    const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
     return `
         <div class="report-card">
-            <img src="${report.photo_url}" alt="Foto del reporte" class="report-image" loading="lazy">
+            <img src="${photoUrl}" alt="Foto del reporte" class="report-image" loading="lazy">
             <div class="report-content">
-                <p class="report-description">${escapeHtml(report.description)}</p>
+                <p class="report-description">${escapeHtml(description)}</p>
                 <div class="report-meta">
                     <div class="report-location">
                         📍 <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer">
-                            ${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}
+                            ${latitude.toFixed(6)}, ${longitude.toFixed(6)}
                         </a>
                     </div>
                     <div class="report-date">
