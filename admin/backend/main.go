@@ -171,9 +171,19 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	// CORS configuration
+	// CORS configuration - SECURITY: Restrict to known origins
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
+
+	// Production origins
+	config.AllowOrigins = []string{
+		"https://admin.zta.148.230.91.96.nip.io",
+	}
+
+	// Allow localhost only in development
+	if os.Getenv("ENV") == "development" {
+		config.AllowOrigins = append(config.AllowOrigins, "http://localhost:3001")
+	}
+
 	config.AllowMethods = []string{"GET", "POST", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	r.Use(cors.New(config))
@@ -227,6 +237,7 @@ func getHeatmapData(c *gin.Context) {
 
 	rows, err := db.Query(query)
 	if err != nil {
+		log.Printf("Database error in getHeatmapData: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}
@@ -255,6 +266,7 @@ func getAllReports(c *gin.Context) {
 
 	rows, err := db.Query(query)
 	if err != nil {
+		log.Printf("Database error in getAllReports: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}

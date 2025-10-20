@@ -241,6 +241,33 @@ SELECT * FROM reports;
 \d reports
 ```
 
+## 🔐 **IMPORTANTE: Seguridad**
+
+### ⚠️ ANTES DE DEPLOYAR A PRODUCCIÓN
+
+**El proyecto está configurado para desarrollo. NUNCA lo deploys directamente sin estos cambios:**
+
+1. **Variables de entorno:**
+   ```bash
+   cp .env.example .env
+   # Editar .env con contraseñas FUERTES
+   # Generar password: openssl rand -base64 32
+   ```
+
+2. **docker-compose.yml:**
+   - ✅ Puerto PostgreSQL **NO** debe estar expuesto (ya está comentado)
+   - ✅ Usar variables de entorno del .env (ya configurado)
+   - ⚠️ **NUNCA** descomentar `ports: - "5432:5432"`
+
+3. **Firewall:**
+   ```bash
+   ufw deny 5432/tcp  # Bloquear PostgreSQL
+   ```
+
+4. **Documentación de Seguridad:**
+   - Revisa `SECURITY_AUDIT.txt` para vulnerabilidades identificadas
+   - Revisa `SECURITY_INCIDENT_REPORT.txt` para aprender del ataque previo
+
 ## 📦 Despliegue a Producción
 
 ### Opción 1: Docker en VPS (DigitalOcean, AWS EC2, etc.)
@@ -250,13 +277,19 @@ SELECT * FROM reports;
 git clone <tu-repositorio>
 cd SUMATE
 
-# Configurar variables de entorno (opcional)
-# Editar docker-compose.yml si necesitas cambiar puertos
+# 1. Crear .env con passwords seguros
+cp .env.example .env
+nano .env  # Editar con contraseñas fuertes
 
-# Levantar servicios
+# 2. Configurar firewall
+ufw deny 5432/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+
+# 3. Levantar servicios
 docker-compose up -d
 
-# Configurar Nginx/Caddy como reverse proxy
+# 4. Configurar Nginx/Caddy como reverse proxy
 # para HTTPS y dominios personalizados
 ```
 

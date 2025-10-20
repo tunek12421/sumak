@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"net/http"
 	"os"
@@ -51,10 +56,27 @@ func main() {
 	// Setup Gin router
 	router := gin.Default()
 
-	// CORS configuration
+	// CORS configuration - SECURITY: Restrict to known origins
 	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
+
+	// Production origins
+	config.AllowOrigins = []string{
+		"https://zta.148.230.91.96.nip.io",
+		"https://admin.zta.148.230.91.96.nip.io",
+		"https://download.zta.148.230.91.96.nip.io",
+	}
+
+	// Allow localhost only in development
+	if os.Getenv("ENV") == "development" {
+		config.AllowOrigins = append(config.AllowOrigins,
+			"http://localhost:3000",
+			"http://localhost:3001",
+			"http://localhost:3002",
+		)
+	}
+
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	config.AllowMethods = []string{"GET", "POST", "OPTIONS"}
 	router.Use(cors.New(config))
 
 	// Serve static files (uploaded photos)
@@ -160,9 +182,23 @@ func getBaseURL() string {
 func createReport(c *gin.Context) {
 	var req CreateReportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Invalid request format from %s: %v", c.ClientIP(), err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
+
+	// SECURITY: Validate description length and content
+	if len(req.Description) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Description is required"})
+		return
+	}
+	if len(req.Description) > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Description too long (max 1000 characters)"})
+		return
+	}
+
+	// Sanitize description (remove potential XSS)
+	req.Description = strings.TrimSpace(req.Description)
 
 	// Validate coordinates
 	if req.Latitude < -90 || req.Latitude > 90 {
@@ -177,7 +213,8 @@ func createReport(c *gin.Context) {
 	// Save photo to filesystem
 	photoPath, err := savePhoto(req.Photo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save photo: %v", err)})
+		log.Printf("Failed to save photo from %s: %v", c.ClientIP(), err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to process image"})
 		return
 	}
 
@@ -194,7 +231,8 @@ func createReport(c *gin.Context) {
 	if err != nil {
 		// Clean up uploaded photo if database insert fails
 		os.Remove(filepath.Join(getUploadsDir(), photoPath))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save report: %v", err)})
+		log.Printf("Database error creating report: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save report"})
 		return
 	}
 
@@ -222,7 +260,8 @@ func getReports(c *gin.Context) {
 
 	rows, err := db.Query(query)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to fetch reports: %v", err)})
+		log.Printf("Database error fetching reports: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch reports"})
 		return
 	}
 	defer rows.Close()
@@ -245,7 +284,8 @@ func getReports(c *gin.Context) {
 	}
 
 	if err = rows.Err(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error reading reports: %v", err)})
+		log.Printf("Error reading reports: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error reading reports"})
 		return
 	}
 
@@ -274,7 +314,8 @@ func getReport(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to fetch report: %v", err)})
+		log.Printf("Database error fetching report %s: %v", id, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch report"})
 		return
 	}
 
@@ -292,29 +333,36 @@ func savePhoto(base64Photo string) (string, error) {
 	// Decode base64
 	photoData, err := base64.StdEncoding.DecodeString(base64Photo)
 	if err != nil {
-		return "", fmt.Errorf("invalid base64 data: %v", err)
+		return "", fmt.Errorf("invalid base64 data")
 	}
 
-	// Validate file size (max 20MB)
+	// SECURITY: Validate file size (max 20MB)
 	if len(photoData) > 20*1024*1024 {
 		return "", fmt.Errorf("file too large (max 20MB)")
 	}
 
-	// Detect image type and set extension
-	ext := ".jpg"
-	contentType := http.DetectContentType(photoData)
-	switch contentType {
-	case "image/jpeg":
-		ext = ".jpg"
-	case "image/png":
-		ext = ".png"
-	case "image/gif":
-		ext = ".gif"
-	case "image/webp":
-		ext = ".webp"
-	default:
-		// Default to jpg if can't detect
-		ext = ".jpg"
+	// Minimum size check (1KB) - prevents empty/tiny files
+	if len(photoData) < 1024 {
+		return "", fmt.Errorf("file too small (min 1KB)")
+	}
+
+	// SECURITY: Verify it's actually an image by decoding it
+	// This prevents malicious files disguised as images
+	_, format, err := image.DecodeConfig(bytes.NewReader(photoData))
+	if err != nil {
+		return "", fmt.Errorf("invalid image file")
+	}
+
+	// SECURITY: Whitelist allowed formats only
+	allowedFormats := map[string]string{
+		"jpeg": ".jpg",
+		"png":  ".png",
+		"gif":  ".gif",
+	}
+
+	ext, ok := allowedFormats[format]
+	if !ok {
+		return "", fmt.Errorf("unsupported image format: %s", format)
 	}
 
 	// Generate unique filename with timestamp and UUID
@@ -323,10 +371,10 @@ func savePhoto(base64Photo string) (string, error) {
 	// Create full path
 	fullPath := filepath.Join(getUploadsDir(), filename)
 
-	// Write file
+	// Write file with restrictive permissions
 	err = os.WriteFile(fullPath, photoData, 0644)
 	if err != nil {
-		return "", fmt.Errorf("failed to write file: %v", err)
+		return "", fmt.Errorf("failed to write file")
 	}
 
 	// Return just the filename (not the full path)

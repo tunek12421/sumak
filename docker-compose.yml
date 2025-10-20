@@ -7,16 +7,20 @@ services:
     container_name: sumate-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sumate
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME_IN_PRODUCTION}
+      POSTGRES_DB: ${POSTGRES_DB:-sumate}
+    # SECURITY: PostgreSQL port NOT exposed to internet
+    # Only accessible from other containers in the same network
+    # ports:
+    #   - "5432:5432"  # NEVER expose this port in production!
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./backend/database/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -33,12 +37,15 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: sumate
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME_IN_PRODUCTION}
+      DB_NAME: ${POSTGRES_DB:-sumate}
       PORT: 8080
-      BASE_URL: https://zta.148.230.91.96.nip.io
+      BASE_URL: ${BASE_URL:-http://localhost:8080}
       UPLOADS_DIR: /root/uploads
+      ENV: ${ENV:-production}
+    # SECURITY: Backend port should only be accessed through nginx reverse proxy
+    # Only expose for development. In production, nginx handles all external traffic
     ports:
       - "8080:8080"
     volumes:
@@ -78,13 +85,15 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: sumate
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME_IN_PRODUCTION}
+      DB_NAME: ${POSTGRES_DB:-sumate}
       PORT: 8081
-      BASE_URL: https://zta.148.230.91.96.nip.io
-      ADMIN_USER: admin
-      ADMIN_PASSWORD: SumateAdmin2025!
+      BASE_URL: ${BASE_URL:-http://localhost:8080}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-CHANGE_ADMIN_PASSWORD}
+      ENV: ${ENV:-production}
+    # SECURITY: Admin backend should only be accessed through nginx reverse proxy
     ports:
       - "8081:8081"
     depends_on:
