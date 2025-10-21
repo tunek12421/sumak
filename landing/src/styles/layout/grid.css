@@ -1,0 +1,38 @@
+/**
+ * Grid System
+ * Sistema de grid responsive
+ */
+
+.grid {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.grid-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2xl);
+    align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .grid-2,
+    .grid-3,
+    .grid-hero {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+}

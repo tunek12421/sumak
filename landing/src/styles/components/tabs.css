@@ -1,0 +1,99 @@
+/**
+ * Tabs Component
+ * Sistema de pestañas para instrucciones
+ */
+
+.how-to {
+    padding: var(--spacing-3xl) var(--spacing-md);
+    background: var(--bg);
+}
+
+.install-tabs {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 12px 30px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    border-radius: var(--radius-full);
+    font-size: var(--font-lg);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.tab-btn:hover {
+    border-color: var(--primary);
+}
+
+.tab-btn.active {
+    background: var(--primary);
+    color: var(--text-white);
+    border-color: var(--primary);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Steps */
+.steps {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.step {
+    display: flex;
+    gap: 25px;
+    margin-bottom: var(--spacing-xl);
+    align-items: flex-start;
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-button);
+    color: var(--text-white);
+    border-radius: var(--radius-circle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: var(--font-bold);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-button);
+}
+
+.step-content h3 {
+    font-size: var(--font-2xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--spacing-xs);
+    color: var(--text);
+}
+
+.step-content p {
+    color: var(--text-light);
+    font-size: var(--font-md);
+    line-height: var(--line-normal);
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .install-tabs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tab-btn {
+        width: 100%;
+    }
+}

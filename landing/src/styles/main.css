@@ -1,0 +1,34 @@
+/**
+ * Main Stylesheet
+ * Importación modular de todos los estilos
+ *
+ * Orden de importación:
+ * 1. Base (variables, reset, typography)
+ * 2. Layout (container, grid, footer)
+ * 3. Components (buttons, cards, hero, etc.)
+ */
+
+/* ============================================
+   BASE
+   ============================================ */
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+@import 'layout/container.css';
+@import 'layout/grid.css';
+@import 'layout/footer.css';
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
+@import 'components/buttons.css';
+@import 'components/cards.css';
+@import 'components/hero.css';
+@import 'components/features.css';
+@import 'components/tabs.css';
+@import 'components/qr-code.css';
+@import 'components/cta-section.css';

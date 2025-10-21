@@ -1,0 +1,68 @@
+/**
+ * Buttons
+ * Sistema de botones
+ */
+
+.btn {
+    padding: 16px 32px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-lg);
+    font-weight: var(--font-semibold);
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--bg);
+    color: #667eea;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+    background: var(--bg-overlay-strong);
+    color: var(--text-white);
+    border: 2px solid var(--text-white);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-large {
+    padding: 20px 40px;
+    font-size: var(--font-3xl);
+}
+
+/* Button Groups */
+.cta-buttons,
+.cta-buttons-large {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.cta-buttons-large {
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .cta-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}

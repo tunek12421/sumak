@@ -1,33 +1,7 @@
 version: '3.8'
 
 services:
-  # ========================================
-  # NGINX REVERSE PROXY
-  # ========================================
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: sumate-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - frontend
-      - admin-frontend
-      - landing
-      - backend
-      - admin-backend
-    networks:
-      - sumate-network
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-
-  # ========================================
-  # DATABASE
-  # ========================================
+  # PostgreSQL Database
   db:
     image: postgres:15-alpine
     container_name: sumate-db
@@ -38,6 +12,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-sumate}
     # SECURITY: PostgreSQL port NOT exposed to internet
     # Only accessible from other containers in the same network
+    # ports:
+    #   - "5432:5432"  # NEVER expose this port in production!
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
@@ -51,9 +27,7 @@ services:
     networks:
       - sumate-network
 
-  # ========================================
-  # BACKEND SERVICES
-  # ========================================
+  # Backend API (Go)
   backend:
     build:
       context: ./backend
@@ -70,7 +44,10 @@ services:
       BASE_URL: ${BASE_URL:-http://localhost:8080}
       UPLOADS_DIR: /root/uploads
       ENV: ${ENV:-production}
-    # SECURITY: No external ports exposed - only accessible via nginx
+    # SECURITY: Backend port should only be accessed through nginx reverse proxy
+    # Only expose for development. In production, nginx handles all external traffic
+    ports:
+      - "8080:8080"
     volumes:
       - uploads_data:/root/uploads
     depends_on:
@@ -84,6 +61,21 @@ services:
       timeout: 10s
       retries: 3
 
+  # Frontend (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sumate-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - sumate-network
+
+  # Admin Backend API (Go)
   admin-backend:
     build:
       context: ./admin/backend
@@ -101,7 +93,9 @@ services:
       ADMIN_USER: ${ADMIN_USER:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-CHANGE_ADMIN_PASSWORD}
       ENV: ${ENV:-production}
-    # SECURITY: No external ports exposed - only accessible via nginx
+    # SECURITY: Admin backend should only be accessed through nginx reverse proxy
+    ports:
+      - "8081:8081"
     depends_on:
       db:
         condition: service_healthy
@@ -113,55 +107,38 @@ services:
       timeout: 10s
       retries: 3
 
-  # ========================================
-  # FRONTEND SERVICES
-  # ========================================
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: sumate-frontend
-    restart: unless-stopped
-    # SECURITY: No external ports exposed - only accessible via nginx
-    depends_on:
-      - backend
-    networks:
-      - sumate-network
-
+  # Admin Frontend (Nginx)
   admin-frontend:
     build:
       context: ./admin/frontend
       dockerfile: Dockerfile
     container_name: sumate-admin-frontend
     restart: unless-stopped
-    # SECURITY: No external ports exposed - only accessible via nginx
+    ports:
+      - "3001:80"
     depends_on:
       - admin-backend
     networks:
       - sumate-network
 
+  # Landing Page (Nginx)
   landing:
     build:
       context: ./landing
       dockerfile: Dockerfile
     container_name: sumate-landing
     restart: unless-stopped
-    # SECURITY: No external ports exposed - only accessible via nginx
+    ports:
+      - "3002:80"
     networks:
       - sumate-network
 
-# ========================================
-# VOLUMES
-# ========================================
 volumes:
   postgres_data:
     driver: local
   uploads_data:
     driver: local
 
-# ========================================
-# NETWORKS
-# ========================================
 networks:
   sumate-network:
     driver: bridge

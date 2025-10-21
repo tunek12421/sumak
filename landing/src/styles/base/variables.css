@@ -1,0 +1,107 @@
+/**
+ * CSS Variables
+ * Tokens de diseño centralizados para el sistema
+ */
+
+:root {
+    /* Colors - Primary */
+    --primary: #4CAF50;
+    --primary-dark: #388E3C;
+    --primary-light: #81C784;
+
+    /* Colors - Secondary */
+    --secondary: #2196F3;
+    --secondary-dark: #1976D2;
+    --secondary-light: #64B5F6;
+
+    /* Colors - Gradients */
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-button: linear-gradient(135deg, var(--primary), var(--secondary));
+
+    /* Colors - Text */
+    --text: #212121;
+    --text-light: #757575;
+    --text-white: #ffffff;
+
+    /* Colors - Background */
+    --bg: #ffffff;
+    --bg-light: #f5f5f5;
+    --bg-dark: #1a1a1a;
+    --bg-overlay: rgba(255, 255, 255, 0.1);
+    --bg-overlay-strong: rgba(255, 255, 255, 0.2);
+
+    /* Colors - Borders */
+    --border: #e0e0e0;
+    --border-light: #f0f0f0;
+
+    /* Spacing */
+    --spacing-xs: 10px;
+    --spacing-sm: 15px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+    --spacing-xl: 40px;
+    --spacing-2xl: 60px;
+    --spacing-3xl: 80px;
+
+    /* Border Radius */
+    --radius-sm: 10px;
+    --radius-md: 15px;
+    --radius-lg: 40px;
+    --radius-full: 50px;
+    --radius-circle: 50%;
+
+    /* Shadows */
+    --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 5px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+    --shadow-button: 0 5px 15px rgba(76, 175, 80, 0.3);
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+
+    /* Z-index */
+    --z-base: 1;
+    --z-dropdown: 10;
+    --z-sticky: 100;
+    --z-modal: 1000;
+    --z-tooltip: 1100;
+
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-monospace: 'Courier New', monospace;
+
+    /* Font Sizes */
+    --font-xs: 0.85rem;
+    --font-sm: 0.95rem;
+    --font-base: 1rem;
+    --font-md: 1.05rem;
+    --font-lg: 1.15rem;
+    --font-xl: 1.2rem;
+    --font-2xl: 1.4rem;
+    --font-3xl: 1.8rem;
+    --font-4xl: 2.5rem;
+    --font-5xl: 3.5rem;
+
+    /* Font Weights */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800;
+    --font-black: 900;
+
+    /* Line Heights */
+    --line-tight: 1.2;
+    --line-normal: 1.6;
+    --line-relaxed: 1.7;
+    --line-loose: 2;
+
+    /* Container */
+    --container-max-width: 1200px;
+    --container-padding: 20px;
+}

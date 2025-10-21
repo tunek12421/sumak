@@ -1,0 +1,67 @@
+/**
+ * Typography
+ * Estilos tipográficos base
+ */
+
+body {
+    font-size: var(--font-base);
+    font-weight: var(--font-normal);
+    line-height: var(--line-normal);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: var(--font-bold);
+    line-height: var(--line-tight);
+}
+
+h1 {
+    font-size: var(--font-5xl);
+    font-weight: var(--font-black);
+}
+
+h2 {
+    font-size: var(--font-4xl);
+    font-weight: var(--font-extrabold);
+}
+
+h3 {
+    font-size: var(--font-2xl);
+    font-weight: var(--font-bold);
+}
+
+p {
+    line-height: var(--line-relaxed);
+}
+
+.text-sm {
+    font-size: var(--font-sm);
+}
+
+.text-lg {
+    font-size: var(--font-lg);
+}
+
+.text-xl {
+    font-size: var(--font-xl);
+}
+
+.font-light {
+    font-weight: var(--font-light);
+}
+
+.font-medium {
+    font-weight: var(--font-medium);
+}
+
+.font-bold {
+    font-weight: var(--font-bold);
+}
+
+.monospace {
+    font-family: var(--font-monospace);
+}

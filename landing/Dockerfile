@@ -1,12 +1,13 @@
 FROM nginx:alpine
 
-# Copy landing page files
-COPY index.html /usr/share/nginx/html/
-COPY app.js /usr/share/nginx/html/
-COPY styles.css /usr/share/nginx/html/
-COPY phone-video.mp4 /usr/share/nginx/html/
+# Copiar archivos principales
+COPY index.html /usr/share/nginx/html/index.html
 
-# Copy nginx config
+# Copiar estructura modular
+COPY src/ /usr/share/nginx/html/src/
+COPY public/ /usr/share/nginx/html/public/
+
+# Copiar configuración de nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
