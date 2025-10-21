@@ -7,7 +7,7 @@ export const CONTENT = {
     // URLs
     urls: {
         app: 'https://zta.148.230.91.96.nip.io',
-        admin: 'https://admin-zta.148.230.91.96.nip.io',
+        admin: 'https://admin.zta.148.230.91.96.nip.io',
         qrDisplay: 'zta.148.230.91.96.nip.io',
         favicon: 'https://zta.148.230.91.96.nip.io/icon-192.png'
     },

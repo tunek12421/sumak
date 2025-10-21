@@ -6,7 +6,7 @@
 export const APP_CONFIG = {
     // URLs
     appUrl: 'https://zta.148.230.91.96.nip.io',
-    adminUrl: 'https://admin-zta.148.230.91.96.nip.io',
+    adminUrl: 'https://admin.zta.148.230.91.96.nip.io',
 
     // QR Code
     qr: {
