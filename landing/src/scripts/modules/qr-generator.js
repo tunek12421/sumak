@@ -4,6 +4,7 @@
  */
 
 import { APP_CONFIG } from '../config/app-config.js';
+import { logger } from '../../utils/logger.js';
 
 /**
  * Genera un código QR
@@ -14,7 +15,7 @@ export function generateQRCode(url = APP_CONFIG.appUrl, elementId = APP_CONFIG.q
     const container = document.getElementById(elementId);
 
     if (!container) {
-        console.error(`❌ QR container not found: #${elementId}`);
+        logger.error(`❌ QR container not found: #${elementId}`);
         return;
     }
 
@@ -32,10 +33,10 @@ export function generateQRCode(url = APP_CONFIG.appUrl, elementId = APP_CONFIG.q
             correctLevel: QRCode.CorrectLevel[APP_CONFIG.qr.correctLevel]
         });
 
-        console.log(`✅ QR Code generated for: ${url}`);
+        logger.log(`✅ QR Code generated for: ${url}`);
         return qrcode;
     } catch (error) {
-        console.error('❌ Error generating QR Code:', error);
+        logger.error('❌ Error generating QR Code:', error);
     }
 }
 

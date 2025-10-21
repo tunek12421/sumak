@@ -8,6 +8,7 @@ import { renderFeatures } from '../../components/features-component.js';
 import { renderHowTo } from '../../components/how-to-component.js';
 import { renderCTA } from '../../components/cta-component.js';
 import { renderFooter } from '../../components/footer-component.js';
+import { logger } from '../../utils/logger.js';
 
 /**
  * Renderiza todos los componentes en el DOM
@@ -16,11 +17,11 @@ export function renderAllComponents() {
     const app = document.getElementById('app');
 
     if (!app) {
-        console.error('❌ #app container not found');
+        logger.error('❌ #app container not found');
         return;
     }
 
-    console.log('🎨 Rendering components...');
+    logger.log('🎨 Rendering components...');
 
     // Renderizar todos los componentes
     const componentsHTML = `
@@ -34,7 +35,7 @@ export function renderAllComponents() {
     // Insertar en el DOM
     app.innerHTML = componentsHTML;
 
-    console.log('✅ Components rendered successfully');
+    logger.log('✅ Components rendered successfully');
 }
 
 /**
@@ -46,7 +47,7 @@ export function renderComponent(componentName, containerId) {
     const container = document.getElementById(containerId);
 
     if (!container) {
-        console.error(`❌ Container #${containerId} not found`);
+        logger.error(`❌ Container #${containerId} not found`);
         return;
     }
 
@@ -61,12 +62,12 @@ export function renderComponent(componentName, containerId) {
     const renderFunction = components[componentName];
 
     if (!renderFunction) {
-        console.error(`❌ Component "${componentName}" not found`);
+        logger.error(`❌ Component "${componentName}" not found`);
         return;
     }
 
     container.innerHTML = renderFunction();
-    console.log(`✅ Component "${componentName}" rendered in #${containerId}`);
+    logger.log(`✅ Component "${componentName}" rendered in #${containerId}`);
 }
 
 export default {

@@ -1,0 +1,29 @@
+{
+  "name": "SUMAQ - Reporta Incidentes en tu Ciudad",
+  "short_name": "SUMAQ",
+  "description": "Aplicación para reportar incidentes con foto y ubicación en Cochabamba",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "lang": "es-BO",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

@@ -10,14 +10,15 @@ import { pwaInstaller } from './modules/pwa-installer.js';
 import { initQRGenerator } from './modules/qr-generator.js';
 import { tabSwitcher } from './modules/tab-switcher.js';
 import { renderAllComponents } from './modules/component-renderer.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Inicializa la aplicación
  */
 function initApp() {
-    console.log('🚀 SUMAQ Landing Page - Nivel 3');
-    console.log('📱 Platform:', getPlatformType());
-    console.log('✅ PWA Support:', supportsPWA());
+    logger.log('🚀 SUMAQ Landing Page - Nivel 3');
+    logger.log('📱 Platform:', getPlatformType());
+    logger.log('✅ PWA Support:', supportsPWA());
 
     // 1. Renderizar componentes HTML dinámicamente
     renderAllComponents();
@@ -30,7 +31,7 @@ function initApp() {
     // 3. PWA Installer se inicializa automáticamente
     // 4. Tab Switcher se inicializa automáticamente
 
-    console.log('✅ App initialized successfully');
+    logger.log('✅ App initialized successfully');
 }
 
 // Iniciar cuando el DOM esté listo

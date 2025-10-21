@@ -4,6 +4,7 @@
  */
 
 import { APP_CONFIG } from '../config/app-config.js';
+import { logger } from '../../utils/logger.js';
 
 class TabSwitcher {
     constructor() {
@@ -32,7 +33,7 @@ class TabSwitcher {
         this.tabContents = document.querySelectorAll(APP_CONFIG.tabs.contentSelector);
 
         if (this.tabButtons.length === 0) {
-            console.warn('⚠️ No tab buttons found');
+            logger.warn('⚠️ No tab buttons found');
             return;
         }
 
@@ -41,7 +42,7 @@ class TabSwitcher {
             btn.addEventListener('click', (e) => this.switchTab(e.currentTarget));
         });
 
-        console.log(`✅ Tab switcher initialized with ${this.tabButtons.length} tabs`);
+        logger.log(`✅ Tab switcher initialized with ${this.tabButtons.length} tabs`);
     }
 
     /**
@@ -52,7 +53,7 @@ class TabSwitcher {
         const targetTab = clickedButton.dataset.tab;
 
         if (!targetTab) {
-            console.warn('⚠️ Tab button missing data-tab attribute');
+            logger.warn('⚠️ Tab button missing data-tab attribute');
             return;
         }
 
