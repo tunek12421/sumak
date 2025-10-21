@@ -12,7 +12,6 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
-      - "443:443"
     depends_on:
       - frontend
       - admin-frontend
